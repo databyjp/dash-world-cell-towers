@@ -23,7 +23,7 @@ def main():
     root_logger.addHandler(sh)
 
     coiled.create_software_environment(
-        name="grid-app-env", pip="coiled_requirements.txt",
+        name="cell-towers-env", pip="coiled_requirements.txt",
     )
 
 
