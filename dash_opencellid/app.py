@@ -80,7 +80,7 @@ def init_client(client):
 def load_df():
     print("Loading data from S3 bucket")
     df = dd.read_parquet(
-        "s3://databyjp/plotly/cell_towers.parq",
+        "s3://databyjp/plotly/cell_towers.parq/*",
         storage_options={"anon": True, 'use_ssl': False}
     )
     df["radio"] = df["radio"].cat.as_known()
