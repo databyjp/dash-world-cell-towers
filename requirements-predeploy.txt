@@ -12,3 +12,4 @@ fastparquet==0.4.1
 requests==2.24.0
 fsspec==0.8.4
 gunicorn==20.0.4
+coiled==0.0.43
