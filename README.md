@@ -31,6 +31,7 @@ an account at https://www.mapbox.com/.
 
 ## Coiled back end
 See implementation in the "coiled" branch 
+Remember to set AWS credentials & coiled token as env variables (or other suitable method)
 
 ## Launching Dashboard in Development Mode
 Launch the dashboard in development mode from the command line with:
