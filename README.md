@@ -30,7 +30,7 @@ file should contain a valid Mapbox token, which can be obtained for free by sett
 an account at https://www.mapbox.com/.
 
 ## Coiled back end
-TBC
+See implementation in the "coiled" branch 
 
 ## Launching Dashboard in Development Mode
 Launch the dashboard in development mode from the command line with:
