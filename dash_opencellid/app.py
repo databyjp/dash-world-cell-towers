@@ -81,6 +81,7 @@ def load_df():
     print("Loading data from S3 bucket")
     df = dd.read_parquet(
         "s3://databyjp/plotly/cell_towers.parq",
+        storage_options={"anon": True}
     )
     df["radio"] = df["radio"].cat.as_known()
     df["Description"] = df["Description"].cat.as_known()
