@@ -7,6 +7,7 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
+import dask.dataframe as dd
 
 import dask
 
@@ -15,6 +16,7 @@ import datashader.transfer_functions as tf
 import numpy as np
 import pandas as pd
 from distributed import Client
+import coiled
 
 from dash_opencellid.utils import (
     compute_range_created_radio_hist,
@@ -27,15 +29,131 @@ from dash_opencellid.utils import (
 client = None
 
 
-def init_client():
-    """
-    This function must be called before any of the functions that require a client.
-    """
-    global client
-    # Init client
-    print(f"Connecting to cluster at {scheduler_url} ... ", end="")
-    client = Client(scheduler_url)
-    print("done")
+# ====================
+# IF USING LOCAL COMPUTE - USE BELOW CODE
+# ====================
+# def init_client():
+#     """
+#     This function must be called before any of the functions that require a client.
+#     """
+#     global client
+#     # Init client
+#     print(f"Connecting to cluster at {scheduler_url} ... ", end="")
+#     client = Client(scheduler_url)
+#     print("done")
+
+
+# ====================
+# IF USING COILED - USE BELOW CODE
+# ====================
+from dash_opencellid.utils import (
+    compute_range_created_radio_hist,
+    epsg_3857_to_4326,
+)
+def init_client(client):
+    if client is None or client.status != "running":
+        print("Starting or connecting to Coiled cluster...")
+        cluster = coiled.Cluster(
+            name="cell-towers-cluster-1",
+            software="cell-towers-env",
+            n_workers=1,
+            worker_cpu=2,
+            worker_memory="8 GiB",
+            shutdown_on_close=False,
+            scheduler_options={"idle_timeout": "1 hour"}
+        )
+        try:
+            client = Client(cluster)
+        except:
+            print("Failed, trying to close the client and connect again...")
+            Client(cluster).close()
+            client = Client(cluster)
+        print(f"Coiled cluster is up! ({client.dashboard_link})")
+
+    return client
+# ====================
+# END - LOCAL COMPUTE
+# ====================
+
+
+# Read data
+def load_df():
+    print("Loading data from S3 bucket")
+    df = dd.read_parquet(
+        "s3://databyjp/plotly/cell_towers.parq",
+    )
+    df["radio"] = df["radio"].cat.as_known()
+    df["Description"] = df["Description"].cat.as_known()
+    df["Status"] = df["Status"].cat.as_known()
+    df["log10_range"] = np.log10(df["range"])
+    
+    # Select columns to persist
+    df = df[
+        [
+            "radio",
+            "x_3857",
+            "y_3857",
+            "log10_range",
+            "created",  # Filtering
+            "lat",
+            "lon",
+            "Description",
+            "Status",
+            "mcc",
+            "net",  # Hover info
+        ]
+    ]
+
+    # Persist and publish Dask dataframe in memory
+    df = df.repartition(npartitions=8).persist()
+
+    return df
+
+
+client = init_client(client)
+df = load_df()
+df = df.persist()
+
+data_3857 = dask.compute(
+    [df["x_3857"].min(), df["y_3857"].min()],
+    [df["x_3857"].max(), df["y_3857"].max()],
+)
+data_center_3857 = [
+    [
+        (data_3857[0][0] + data_3857[1][0]) / 2.0,
+        (data_3857[0][1] + data_3857[1][1]) / 2.0,
+    ]
+]
+data_4326 = epsg_3857_to_4326(data_3857)
+data_center_4326 = epsg_3857_to_4326(data_center_3857)
+
+# Create bin edges
+quarter_bins = pd.date_range("2003", "2020", freq="QS")
+created_bin_edges = quarter_bins[0::4]
+created_bin_centers = quarter_bins[2::4]
+created_bins = created_bin_edges.astype("int")
+
+min_log10_range, max_log10_range = dask.compute(
+    df["log10_range"].min(), df["log10_range"].max()
+)
+
+client.publish_dataset(min_log10_range=min_log10_range)
+client.publish_dataset(max_log10_range=max_log10_range)
+
+# Pre-compute histograms containing all observations
+total_range_created_radio_agg = compute_range_created_radio_hist(client)
+total_radio_counts = total_range_created_radio_agg.sum(
+    ["log10_range", "created"]
+).to_series()
+total_range_counts = total_range_created_radio_agg.sum(
+    ["radio", "created"]
+).to_series()
+total_created_counts = total_range_created_radio_agg.sum(
+    ["log10_range", "radio"]
+).to_series()
+# ====================
+# END - COILED
+# ====================
 
 
 # Radio constants
@@ -1015,6 +1133,7 @@ def build_created_histogram(selected_created_counts, selection_cleared):
     return fig
 
 
+# HIDE IF USING COILED
 # gunicorn entry point
 def get_server():
     init_client()
