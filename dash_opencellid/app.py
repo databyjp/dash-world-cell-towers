@@ -79,9 +79,12 @@ def init_client(client):
 # Read data
 def load_df():
     print("Loading data from S3 bucket")
+    import os
+    aws_key = os.environ['AWS_ACCESS_KEY_ID']
+    aws_secret = os.environ['AWS_SECRET_ACCESS_KEY']
     df = dd.read_parquet(
-        "s3://databyjp/plotly/cell_towers.parq/*",
-        storage_options={"anon": True, 'use_ssl': False}
+        "s3://databyjp/plotly/cell_towers.parq",
+        storage_options={"key": aws_key, 'secret': aws_secret}
     )
     df["radio"] = df["radio"].cat.as_known()
     df["Description"] = df["Description"].cat.as_known()
