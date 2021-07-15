@@ -237,6 +237,7 @@ def build_modal_info_overlay(id, side, content):
 
 # Build Dash layout
 app = dash.Dash(__name__)
+server = app.server
 
 app.layout = html.Div(
     children=[
