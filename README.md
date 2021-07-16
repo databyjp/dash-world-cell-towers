@@ -30,8 +30,8 @@ file should contain a valid Mapbox token, which can be obtained for free by sett
 an account at https://www.mapbox.com/.
 
 ## Coiled back end
-See implementation in the "coiled" branch 
-Remember to set AWS credentials & coiled token as env variables (or other suitable method)
+For an implementation using a Coiled cluster for the back end (https://coiled.io/) see the "coiled" branch 
+** Remember to set AWS credentials & coiled token as env variables (or other suitable method)
 
 ## Launching Dashboard in Development Mode
 Launch the dashboard in development mode from the command line with:
