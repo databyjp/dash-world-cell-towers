@@ -145,9 +145,6 @@ min_log10_range, max_log10_range = dask.compute(
     df["log10_range"].min(), df["log10_range"].max()
 )
 
-client.publish_dataset(min_log10_range=min_log10_range)
-client.publish_dataset(max_log10_range=max_log10_range)
-
 print("Pre-computing histograms")
 total_range_created_radio_agg = compute_range_created_radio_hist(client)
 total_radio_counts = total_range_created_radio_agg.sum(
