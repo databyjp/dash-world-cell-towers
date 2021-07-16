@@ -58,7 +58,7 @@ def init_client(client):
             software="cell-towers-env",
             n_workers=1,
             worker_cpu=2,
-            worker_memory="8 GiB",
+            worker_memory="16 GiB",
             shutdown_on_close=False,
             scheduler_options={"idle_timeout": "1 hour"}
         )
