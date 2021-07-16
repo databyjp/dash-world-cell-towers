@@ -5,16 +5,16 @@ from pyproj import Transformer
 scheduler_url = "127.0.0.1:8786"
 
 
-def compute_range_created_radio_hist(client):
+def compute_range_created_radio_hist(df, created_bin_edges, created_bin_centers, min_log10_range, max_log10_range):
     """
     Use Datashader to compute a 3D histogram of cell_towers_ddf, binned by the created,
     log10_range, and radio dimensions
     """
-    cell_towers_ddf = client.get_dataset("cell_towers_ddf")
-    created_bin_edges = client.get_dataset("created_bin_edges")
-    created_bin_centers = client.get_dataset("created_bin_centers")
-    min_log10_range = client.get_dataset("min_log10_range")
-    max_log10_range = client.get_dataset("max_log10_range")
+    # cell_towers_ddf = client.get_dataset("cell_towers_ddf")
+    # created_bin_edges = client.get_dataset("created_bin_edges")
+    # created_bin_centers = client.get_dataset("created_bin_centers")
+    # min_log10_range = client.get_dataset("min_log10_range")
+    # max_log10_range = client.get_dataset("max_log10_range")
 
     created_bins = created_bin_edges.astype("int")
 
@@ -27,7 +27,7 @@ def compute_range_created_radio_hist(client):
         y_range=[min_log10_range, max_log10_range],
     )
     agg = cvs2.points(
-        cell_towers_ddf, x="created", y="log10_range", agg=ds.count_cat("radio")
+        df, x="created", y="log10_range", agg=ds.count_cat("radio")
     )
 
     # Set created index back to datetime values

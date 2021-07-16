@@ -146,7 +146,7 @@ min_log10_range, max_log10_range = dask.compute(
 )
 
 print("Pre-computing histograms")
-total_range_created_radio_agg = compute_range_created_radio_hist(client)
+total_range_created_radio_agg = compute_range_created_radio_hist(df, created_bin_edges, created_bin_centers, min_log10_range, max_log10_range)
 total_radio_counts = total_range_created_radio_agg.sum(
     ["log10_range", "created"]
 ).to_series()
@@ -890,7 +890,7 @@ def update_plots(
     map_graph["layout"]["mapbox"].update(position)
 
     # Use datashader to histogram range, created, and radio simultaneously
-    agg_range_created_radio = compute_range_created_radio_hist(client)
+    agg_range_created_radio = compute_range_created_radio_hist(df, created_bin_edges, created_bin_centers, min_log10_range, max_log10_range)
 
     # Build radio histogram
     selected_radio_counts = (
