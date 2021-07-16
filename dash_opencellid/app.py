@@ -56,8 +56,8 @@ def init_client(client):
         cluster = coiled.Cluster(
             name="cell-towers-cluster-1",
             software="cell-towers-env",
-            n_workers=1,
-            worker_cpu=2,
+            n_workers=2,
+            worker_cpu=4,
             worker_memory="16 GiB",
             shutdown_on_close=False,
             scheduler_options={"idle_timeout": "1 hour"}
