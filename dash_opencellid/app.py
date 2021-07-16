@@ -88,7 +88,6 @@ def load_df():
         storage_options={"key": aws_key, 'secret': aws_secret}
     )
     print("Starting preprocessing...")
-    df = df[df["radio"] != "NR"]
     df["radio"] = df["radio"].cat.as_known()
     df["Description"] = df["Description"].cat.as_known()
     df["Status"] = df["Status"].cat.as_known()
@@ -164,8 +163,8 @@ print("Finished pre-calculations")
 
 
 # Radio constants
-radio_categories = ["UMTS", "LTE", "GSM", "CDMA"]
-radio_colors_list = ["green", "red", "blue", "orange"]
+radio_categories = ["UMTS", "LTE", "GSM", "CDMA", "NR"]
+radio_colors_list = ["green", "red", "blue", "orange", "white"]
 radio_colors = {cat: color for cat, color in zip(radio_categories, radio_colors_list)}
 
 # Colors
