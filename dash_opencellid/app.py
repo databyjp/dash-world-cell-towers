@@ -120,6 +120,8 @@ client = init_client(client)
 df = load_df()
 df = df.persist()
 
+print("Performing pre-calculations")
+print("Getting bounds")
 data_3857 = dask.compute(
     [df["x_3857"].min(), df["y_3857"].min()],
     [df["x_3857"].max(), df["y_3857"].max()],
@@ -133,7 +135,7 @@ data_center_3857 = [
 data_4326 = epsg_3857_to_4326(data_3857)
 data_center_4326 = epsg_3857_to_4326(data_center_3857)
 
-# Create bin edges
+print("Getting histogram bin edges")
 quarter_bins = pd.date_range("2003", "2020", freq="QS")
 created_bin_edges = quarter_bins[0::4]
 created_bin_centers = quarter_bins[2::4]
@@ -146,7 +148,7 @@ min_log10_range, max_log10_range = dask.compute(
 client.publish_dataset(min_log10_range=min_log10_range)
 client.publish_dataset(max_log10_range=max_log10_range)
 
-# Pre-compute histograms containing all observations
+print("Pre-computing histograms")
 total_range_created_radio_agg = compute_range_created_radio_hist(client)
 total_radio_counts = total_range_created_radio_agg.sum(
     ["log10_range", "created"]
@@ -157,6 +159,7 @@ total_range_counts = total_range_created_radio_agg.sum(
 total_created_counts = total_range_created_radio_agg.sum(
     ["log10_range", "radio"]
 ).to_series()
+print("Finished pre-calculations")
 # ====================
 # END - COILED
 # ====================
@@ -616,11 +619,6 @@ def update_plots(
     selected_range,
     selected_created,
 ):
-    cell_towers_ddf = get_dataset(client, "cell_towers_ddf")
-    data_4326 = get_dataset(client, "data_4326")
-    data_center_4326 = get_dataset(client, "data_center_4326")
-    data_3857 = get_dataset(client, "data_3857")
-
     t0 = time.time()
     coordinates_4326 = relayout_data and relayout_data.get("mapbox._derived", {}).get(
         "coordinates", None
@@ -702,12 +700,12 @@ def update_plots(
     # Build dataframe containing rows that satisfy the range and created selections
     if query_expr_range_created_parts:
         query_expr_range_created = " & ".join(query_expr_range_created_parts)
-        ddf_selected_range_created = cell_towers_ddf.query(query_expr_range_created)
+        ddf_selected_range_created = df.query(query_expr_range_created)
     else:
-        ddf_selected_range_created = cell_towers_ddf
+        ddf_selected_range_created = df
 
     # Build dataframe containing rows of towers within the map viewport
-    ddf_xy = cell_towers_ddf.query(query_expr_xy) if query_expr_xy else cell_towers_ddf
+    ddf_xy = df.query(query_expr_xy) if query_expr_xy else df
 
     # Build map figure
     # Create datashader aggregation of x/y data that satisfies the range and created
@@ -755,7 +753,7 @@ def update_plots(
             + [f"(radio in {selected_radio_categories})"]
             + query_expr_range_created_parts
         )
-        ddf_small = cell_towers_ddf.query(ddf_small_expr)
+        ddf_small = df.query(ddf_small_expr)
         (
             lat,
             lon,
@@ -946,8 +944,6 @@ def build_radio_histogram(selected_radio_counts, selection_cleared):
     """
     Build horizontal histogram of radio counts
     """
-    total_radio_counts = get_dataset(client, "total_radio_counts")
-
     selectedpoints = False if selection_cleared else None
     hovertemplate = "%{x:,.0}<extra></extra>"
 
@@ -1015,8 +1011,6 @@ def build_range_histogram(selected_range_counts, selection_cleared):
     """
     Build histogram of log10_range values
     """
-    total_range_counts = get_dataset(client, "total_range_counts")
-
     selectedpoints = False if selection_cleared else None
     hovertemplate = (
         "count: %{y:,.0}<br>"
@@ -1085,7 +1079,6 @@ def build_created_histogram(selected_created_counts, selection_cleared):
     """
     Build histogram of creation date values
     """
-    total_created_counts = get_dataset(client, "total_created_counts")
     selectedpoints = False if selection_cleared else None
     hovertemplate = "count: %{y:,.0}<br>" "year: %{x|%Y}<br>" "<extra></extra>"
 
