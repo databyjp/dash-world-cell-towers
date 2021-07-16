@@ -29,6 +29,10 @@ To run the dashboard, create a file name `.mapbox_token` under to root directory
 file should contain a valid Mapbox token, which can be obtained for free by setting up
 an account at https://www.mapbox.com/.
 
+## Coiled back end
+For an implementation using a Coiled cluster for the back end (https://coiled.io/) see the "coiled" branch 
+** Remember to set AWS credentials & coiled token as env variables (or other suitable method)
+
 ## Launching Dashboard in Development Mode
 Launch the dashboard in development mode from the command line with:
 ```

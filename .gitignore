@@ -1,5 +1,7 @@
 .mapbox_token
 .idea/
+venv/
+temp/
 assets/plotly.js
 data/cell_towers.parq
 .ipynb_checkpoints/
