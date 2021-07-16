@@ -87,7 +87,7 @@ def load_df():
         "s3://databyjp/plotly/cell_towers_sm.parq",
         storage_options={"key": aws_key, 'secret': aws_secret}
     )
-    print("Performing preprocessing...")
+    print("Starting preprocessing...")
     df["radio"] = df["radio"].cat.as_known()
     df["Description"] = df["Description"].cat.as_known()
     df["Status"] = df["Status"].cat.as_known()
@@ -109,7 +109,7 @@ def load_df():
             "net",  # Hover info
         ]
     ]
-
+    print("Repartitioning...")
     # Persist and publish Dask dataframe in memory
     df = df.repartition(npartitions=8).persist()
     print("Finished loading data")
