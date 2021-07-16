@@ -196,10 +196,10 @@ def blank_fig(height):
     }
 
 
-# Load mapbox token
-token = os.getenv("MAPBOX_TOKEN")
-if not token:
-    token = open(".mapbox_token").read()
+# # Load mapbox token
+# token = os.getenv("MAPBOX_TOKEN")
+# if not token:
+#     token = open(".mapbox_token").read()
 
 
 def build_modal_info_overlay(id, side, content):
@@ -863,8 +863,7 @@ def update_plots(
             "template": template,
             "uirevision": True,
             "mapbox": {
-                "style": "light",
-                "accesstoken": token,
+                "style": "carto-positron",
                 "layers": layers,
             },
             "margin": {"r": 0, "t": 0, "l": 0, "b": 0},
