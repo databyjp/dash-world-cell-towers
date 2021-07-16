@@ -80,3 +80,7 @@ ddf_merged
 # Write parquet file to ../data directory
 parquet_path = 'temp/cell_towers.parq'
 ddf_merged.to_parquet(parquet_path, compression=None)
+
+ddf_sm = ddf_merged.sample(frac=0.1)
+sm_parquet_path = 'temp/cell_towers_sm.parq'
+ddf_sm.to_parquet(sm_parquet_path, compression=None)

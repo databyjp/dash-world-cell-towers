@@ -83,9 +83,11 @@ def load_df():
     aws_key = os.environ['AWS_ACCESS_KEY_ID']
     aws_secret = os.environ['AWS_SECRET_ACCESS_KEY']
     df = dd.read_parquet(
-        "s3://databyjp/plotly/cell_towers.parq",
+        # "s3://databyjp/plotly/cell_towers.parq",
+        "s3://databyjp/plotly/cell_towers_sm.parq",
         storage_options={"key": aws_key, 'secret': aws_secret}
     )
+    print("Performing preprocessing...")
     df["radio"] = df["radio"].cat.as_known()
     df["Description"] = df["Description"].cat.as_known()
     df["Status"] = df["Status"].cat.as_known()
@@ -110,7 +112,7 @@ def load_df():
 
     # Persist and publish Dask dataframe in memory
     df = df.repartition(npartitions=8).persist()
-
+    print("Finished loading data")
     return df
 
 
