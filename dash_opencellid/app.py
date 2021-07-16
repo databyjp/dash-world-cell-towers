@@ -88,6 +88,7 @@ def load_df():
         storage_options={"key": aws_key, 'secret': aws_secret}
     )
     print("Starting preprocessing...")
+    df = df[df["radio"] != "NR"]
     df["radio"] = df["radio"].cat.as_known()
     df["Description"] = df["Description"].cat.as_known()
     df["Status"] = df["Status"].cat.as_known()
